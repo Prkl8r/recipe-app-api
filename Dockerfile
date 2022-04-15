@@ -2,9 +2,10 @@ FROM alpine:3.15
 
 ENV PYTHONUNBUFFERED 1
 
-
+#Install dependencies
 COPY ./requirements.txt /requirements.txt
 COPY ./setup.cfg /setup.cfg
+
 RUN apk add --update py3-pip
 RUN pip install -r /requirements.txt
 
