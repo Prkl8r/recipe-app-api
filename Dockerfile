@@ -4,6 +4,7 @@ ENV PYTHONUNBUFFERED 1
 
 
 COPY ./requirements.txt /requirements.txt
+COPY ./setup.cfg /setup.cfg
 RUN apk add --update py3-pip
 RUN pip install -r /requirements.txt
 
