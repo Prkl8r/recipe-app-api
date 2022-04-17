@@ -8,6 +8,7 @@ from rest_framework import status
 
 CREATE_USER_URL = reverse("user:create")
 TOKEN_URL = reverse('user:token')
+ME_URL = reverse("user:me")
 
 
 def create_user(**params):
@@ -108,3 +109,20 @@ class PublicUserApiTests(TestCase):
         # Test email an pword are required
         res = self.client.post(TOKEN_URL, {"email": "one", "password": ""})
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_user_unauthorized(self):
+        # Test that authentication is required for users
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserApiTests(TestCase):
+    # Test API respionce that require authentication
+
+    def setUp(self):
+        self.user = create_user(
+            email="test@example.com", 
+            password="testpass", 
+            name="name"
+        )
