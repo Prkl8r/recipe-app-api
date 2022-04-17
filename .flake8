@@ -7,10 +7,16 @@ exclude =
 	docs/source/conf.py
 	old,
 	build,
+        migrations,
+        settings.py,
+        migrate.py
+        
 	distexclude =
         .git,
         __pycache__,
         docs/source/conf.py
         old,
         build,
-        dist
+        dist,
+        
+        
