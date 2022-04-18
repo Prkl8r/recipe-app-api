@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED 1
 
 #Install dependencies
 COPY ./requirements.txt /requirements.txt
-COPY ./setup.cfg /setup.cfg
+COPY ./.flake8 /.flake8
 
 # --no-cache reduces the size of the docker size
 RUN apk add --update --no-cache postgresql-client

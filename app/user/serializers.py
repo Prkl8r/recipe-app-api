@@ -22,7 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
         return get_user_model().objects.create_user(**validated_data)
 
     def update(self, instace, validated_data):
-        # Updating a user, setting the password correctly and return it
+        # Updat
+        # ing a user, setting the password correctly and return it
         password = validated_data.pop("password", None)
         user = super().update(instace, validated_data)
 
