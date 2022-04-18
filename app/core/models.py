@@ -47,5 +47,5 @@ class Tag(models.Model):
         on_delete=models.CASCADE,
     )
 
-    def __Str__(self):
+    def __str__(self):
         return self.name
