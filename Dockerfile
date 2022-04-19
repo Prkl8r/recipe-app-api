@@ -1,10 +1,16 @@
 FROM alpine:3.15
 
-ENV PYTHONUNBUFFERED 1
+EXPOSE 8000
+
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
 
 #Install dependencies
 COPY ./requirements.txt /requirements.txt
-COPY ./setup.cfg /setup.cfg
+COPY ./.flake8 /.flake8
 
 # --no-cache reduces the size of the docker size
 RUN apk add --update --no-cache postgresql-client
@@ -18,11 +24,22 @@ RUN pip install -r /requirements.txt
 RUN apk del .tmp-build-deps
 
 #Creates the app directory and copies it to the Dockerfile
-RUN mkdir /app
+#RUN mkdir /app
 WORKDIR /app
-COPY ./app /app
+COPY ./app/ /app
 
 #Create user -D creates user for running apps only
+#RUN adduser -D user
+#USER user
+
+# Creates a non-root user with an explicit UID and adds permission to access the /app folder
+# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
+#RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
+#USER appuser
+
 RUN adduser -D user
 USER user
 
+# During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
+# File wsgi.py was not found in subfolder: 'vscode-django-docker'. Please enter the Python path to wsgi file.
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.wsgi"]
