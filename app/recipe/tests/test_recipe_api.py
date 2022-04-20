@@ -59,7 +59,7 @@ class PrivateRecipeApiTests(TestCase):
 
         # Act
         res = self.client.get(RECIPE_URL)
-        recipes = Recipe.objects.all().order_by("-id")
+        recipes = Recipe.objects.all().order_by("id")
         serializer = RecipeSerializer(recipes, many=True)
 
         # Assert
