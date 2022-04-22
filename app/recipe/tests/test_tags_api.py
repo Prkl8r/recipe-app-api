@@ -5,7 +5,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Tag
+from core.models import Tag, Recipe
 
 from recipe.serializers import TagSerializer
 
@@ -83,3 +83,52 @@ class PrivateTagsApiTests(TestCase):
         res = self.client.post(TAGS_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retreive_tags_assigned_to_recipes(self):
+        # Test filtering tags by those assigned to recipes
+        tag1 = Tag.objects.create(user=self.user, name="Breakfast")
+        tag2 = Tag.objects.create(user=self.user, name="Chicken")
+        recipe = Recipe.objects.create(
+            title='Chicken Pot Pie',
+            time_minutes=93,
+            price=17,
+            user=self.user
+        )
+        recipe.tags.add(tag2)
+
+        # Act
+        res = self.client.get(TAGS_URL, {'assigned_only': 1})
+
+        serializer1 = TagSerializer(tag1)  # Breakfast Tag
+        serializer2 = TagSerializer(tag2)  # Chicken Tag
+
+        # Assert
+        self.assertNotIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+
+    def test_filtered_tags_assigned_to_recipes_are_unique(self):
+        # Test filtering tags by assigned returns unique values
+        # Arrange
+        tag = Tag.objects.create(user=self.user, name="Breakfast")
+        Tag.objects.create(user=self.user, name="Lunch")
+        recipe1 = Recipe.objects.create(
+            title='Breakfast Burrito',
+            time_minutes=93,
+            price=17,
+            user=self.user
+        )
+        recipe2 = Recipe.objects.create(
+            title='Buttermilk Pancakes',
+            time_minutes=23,
+            price=3,
+            user=self.user
+        )
+
+        recipe1.tags.add(tag)  # Add 'Breakfast' tag to 'Breakfast Burrito'
+        recipe2.tags.add(tag)  # Add 'Breakfast' tag to 'Buttermilk PAncakes'
+
+        # Act
+        res = self.client.get(TAGS_URL, {'assigned_only': 1})
+
+        # Assert
+        self.assertEqual(len(res.data), 1)
