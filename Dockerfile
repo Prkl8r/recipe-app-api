@@ -13,9 +13,11 @@ COPY ./requirements.txt /requirements.txt
 COPY ./.flake8 /.flake8
 
 # --no-cache reduces the size of the docker size
-RUN apk add --update --no-cache postgresql-client
+RUN apk add --update --no-cache postgresql-client \
+        jpeg-dev
 RUN apk add --update --no-cache --virtual .tmp-build-deps \
-        gcc libc-dev linux-headers postgresql-dev libpq-dev python3-dev
+        gcc libc-dev linux-headers postgresql-dev libpq-dev python3-dev \
+        musl-dev zlib zlib-dev
 
 RUN apk add --update py3-pip
 RUN pip install -r /requirements.txt
