@@ -1,4 +1,3 @@
-from email.mime import multipart
 import tempfile
 import os
 from PIL import Image
@@ -252,9 +251,8 @@ class RecipeImageUploadTests(TestCase):
     def tearDown(self):
         self.recipe.image.delete()
 
-
     def test_upload_valid_image_to_recipe(self):
-        # Test uploading an image to REcipe
+        # Test uploading an image to Recipe
         # Arrange
         url = image_upload_url(self.recipe.id)
 
@@ -282,3 +280,56 @@ class RecipeImageUploadTests(TestCase):
 
         # Assert
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_filter_recipe_by_tag(self):
+        # Test returning recipes with specific tags
+        # Arrange
+        recipe1 = sample_recipe(user=self.user, title="Thai Veg Curry")
+        recipe2 = sample_recipe(user=self.user, title="Mushroom Pizza")
+        tag1 = sample_tag(user=self.user, name='Italian')
+        tag2 = sample_tag(user=self.user, name='Vegetarian')
+        recipe2.tags.add(tag1)
+        recipe1.tags.add(tag2)
+        recipe3 = sample_recipe(user=self.user, title="Philly Cheesesteak")
+
+        # Act
+        res = self.client.get(
+            RECIPE_URL,
+            {'tags': f'{tag1.id},{tag2.id}'}
+        )
+
+        serializer1 = RecipeSerializer(recipe1)
+        serializer2 = RecipeSerializer(recipe2)
+        serializer3 = RecipeSerializer(recipe3)
+
+        # Assert
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)
+
+    def test_filter_recipe_by_ingredient(self):
+        # Test returning recipes with specific ingredients
+        # Arrange
+        recipe1 = sample_recipe(user=self.user, title="Thai Veg Curry")
+        recipe2 = sample_recipe(user=self.user, title="Mushroom Pizza")
+        ingredient1 = sample_ingredient(user=self.user, name='Curry Powder')
+        ingredient2 = sample_ingredient(user=self.user, name="Mushroom")
+        recipe3 = sample_recipe(user=self.user, title="Philly Cheesesteak")
+
+        recipe1.ingredients.add(ingredient1)
+        recipe2.ingredients.add(ingredient2)
+
+        # Act
+        res = self.client.get(
+            RECIPE_URL,
+            {'ingredients': f'{ingredient1.id},{ingredient2.id}'}
+        )
+
+        serializer1 = RecipeSerializer(recipe1)
+        serializer2 = RecipeSerializer(recipe2)
+        serializer3 = RecipeSerializer(recipe3)
+
+        # Assert
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)

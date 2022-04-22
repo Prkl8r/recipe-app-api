@@ -77,7 +77,7 @@ class ModelTests(TestCase):
         self.assertEqual(str(recipe), recipe.title)
 
     @patch('uuid.uuid4')
-    def recipe_filename_uuid(self, mock_uuid):
+    def test_recipe_filename_uuid(self, mock_uuid):
         # Test that image is saved in the correct location
         # Arrange
         uuid = 'test-uuid'
