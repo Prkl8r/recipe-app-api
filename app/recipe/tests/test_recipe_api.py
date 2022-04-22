@@ -83,6 +83,7 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_recipe_limited_to_user(self):
         # Test retrieving recipes for user
+        # Arrange
         user2 = get_user_model().objects.create_user(
             "other@example.com",
             "password1234"
@@ -190,6 +191,7 @@ class PrivateRecipeApiTests(TestCase):
         payload = {"title": "Steak Tartar", "tags": [new_tag.id]}
 
         url = detail_url(recipe.id)
+
         # Act
         res = self.client.patch(url, payload)
         recipe.refresh_from_db()
@@ -200,3 +202,27 @@ class PrivateRecipeApiTests(TestCase):
         self.assertEqual(recipe.title, payload['title'])
         self.assertEqual(len(tags), 1)
 
+    def test_full_update_recipe(self):
+        # Test updating a recipe with PUT.
+        # Arrange
+        recipe = sample_recipe(user=self.user)
+        recipe.tags.add(sample_tag(user=self.user))
+        payload = {
+            'title': 'Spaghetti Carbanara',
+            'time_minutes': 36,
+            'price': 13.50,
+        }
+
+        url = detail_url(recipe.id)
+
+        # Act
+        res = self.client.put(url, payload)
+        recipe.refresh_from_db()
+        tags = recipe.tags.all()
+
+        # Assert
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(recipe.title, payload['title'])
+        self.assertEqual(recipe.time_minutes, payload['time_minutes'])
+        self.assertEqual(recipe.price, payload['price'])
+        self.assertEqual(len(tags), 0)
